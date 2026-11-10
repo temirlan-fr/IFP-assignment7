@@ -40,6 +40,7 @@ var tests = new List<(string Name, Action Run)>
 
 tests.AddRange(ReportTests.Cases());
 tests.AddRange(ScoringTests.Cases());
+tests.AddRange(DeferredTests.Cases());
 
 var failures = 0;
 foreach (var test in tests)

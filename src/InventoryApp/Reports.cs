@@ -7,9 +7,16 @@ public static class Reports
 {
     public static LowStockRow[] LowStock(IEnumerable<Product> products) => LowStock(products, p => p.Shortage(), p => p.Shortage());
 
-    public static LowStockRow[] LowStock(IEnumerable<Product> products, Func<Product, long> standardScore, Func<Product, long> urgentScore) => products
-        .Where(p => p.Shortage() > 0)
-        .Select(p => new LowStockRow(p.Id, p.Name, p.Category, p.Quantity, p.Shortage(), (long)p.Shortage() * p.UnitPriceCents, standardScore(p), urgentScore(p)))
+    public static IEnumerable<LowStockRow> ProjectStock(IEnumerable<Product> products, Func<Product, long> standardScore, Func<Product, long> urgentScore)
+    {
+        foreach (var product in products)
+            yield return new LowStockRow(product.Id, product.Name, product.Category, product.Quantity,
+                product.Shortage(), (long)product.Shortage() * product.UnitPriceCents, standardScore(product), urgentScore(product));
+    }
+
+    public static LowStockRow[] LowStock(IEnumerable<Product> products, Func<Product, long> standardScore, Func<Product, long> urgentScore) =>
+        ProjectStock(products, standardScore, urgentScore)
+        .Where(row => row.Shortage > 0)
         .OrderByDescending(row => row.Shortage)
         .ThenBy(row => row.Id, StringComparer.Ordinal)
         .ToArray();

@@ -30,6 +30,12 @@ dotnet run --project tests/InventoryApp.Tests
 
 The assertion based test runner returns exit code one on failure.
 
+Task 4 Deferred execution
+
+Reports.ProjectStock uses yield return to project actual products into stock report rows. Creating the enumerable and obtaining its enumerator do not process a product. MoveNext processes the next product. DeferredTests uses a test only scoring probe to assert zero calls before iteration, one call after the first item, and the expected total after enumeration. Production calculations contain no diagnostic counters.
+
+Reports.LowStock composes ProjectStock, Where, OrderByDescending and ThenBy, then deliberately calls ToArray. Reports.CategoryValues also materialises its final output. The application can display and export those stable rows without recalculating them. Enumerating ProjectStock again before materialisation recomputes pure projections over the in memory product snapshot. Enumerating a materialised array again only reads saved rows. Neither operation rereads a file or changes business state. Latest result after Task 4 is 15 tests passed.
+
 Task 3 Currying and partial application
 
 Scoring.CreateScore takes an immutable validated ScoreConfiguration and returns a function from Product to long. Arguments arrive in successive calls. Program.cs fixes weight 2 and empty stock bonus 5 for standard purchasing, then weight 5 and bonus 20 for urgent purchasing. Both configured functions are passed into Reports.LowStock. No global setting changes.
