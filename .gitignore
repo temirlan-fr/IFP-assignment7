@@ -4,5 +4,7 @@
 .idea/
 artifacts/
 native/build/
+.tools/
+.zig-cache/
 *.user
 *.suo

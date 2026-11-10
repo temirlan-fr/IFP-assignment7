@@ -30,6 +30,16 @@ dotnet run --project tests/InventoryApp.Tests
 
 The assertion based test runner returns exit code one on failure.
 
+Task 7 Native C library contract
+
+native/inventory_native.c and native/inventory_native.h implement inventory_restock_cost. Its three arguments are int32_t quantity, reorder_level and unit_price_cents. Each accepts zero through one million inclusive. The return type is int64_t and represents the missing units times the unit price in cents. A product at or above its reorder level returns zero. Invalid input returns minus one. The export uses the C calling convention cdecl and fixed width types to avoid platform dependent long sizes.
+
+All money is expressed in integer cents and multiplication is exact, so no rounding is needed. The maximum valid result is one trillion cents and fits in 64 bits. Manually checked example for Notebook is quantity 3, reorder level 10 and unit price 250. Seven missing units times 250 cents gives 1750 cents. The function performs no allocation and returns no pointers or handles.
+
+The supported native target is Windows x64. scripts/setup-compiler.ps1 downloads portable Zig 0.14.1 from the official Zig site and verifies its published SHA256. It does not install a system toolchain. scripts/build-native.ps1 invokes Zig cc with C11, warnings as errors, optimisation and the x86_64 Windows GNU target. Source is compiled into native/build/win-x64/inventory_native.dll. Generated binaries and the compiler directory are ignored by Git.
+
+Run powershell -NoProfile -ExecutionPolicy Bypass -File scripts/setup-compiler.ps1 once, then powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native.ps1. The build also compiles and runs native/native_tests.c with assertions for the hand calculated example, stocked products, invalid arguments and the largest valid result. These C assertions supplement the managed test suite.
+
 Task 6 Retention and allocation review
 
 InventoryStore.Load first materialises the JSON text. Parse temporarily creates deserialised rows, a validation list and a set of ids, then returns one Product array. These temporary parsing objects become eligible for collection after Load returns. The dataset is read once per workflow invocation and shared by both reports.
