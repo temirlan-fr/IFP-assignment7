@@ -30,6 +30,16 @@ dotnet run --project tests/InventoryApp.Tests
 
 The assertion based test runner returns exit code one on failure.
 
+Task 6 Retention and allocation review
+
+InventoryStore.Load first materialises the JSON text. Parse temporarily creates deserialised rows, a validation list and a set of ids, then returns one Product array. These temporary parsing objects become eligible for collection after Load returns. The dataset is read once per workflow invocation and shared by both reports.
+
+ProjectStock retains a reference to its source and two scoring delegates until its enumerable can be collected. Each scoring closure retains only its small immutable ScoreConfiguration and does not capture the product collection. Materialising the final reports with ToArray avoids repeating sorting, grouping and row allocations when displaying and exporting the same results. LINQ ordering and grouping also allocate temporary buffers during enumeration.
+
+The program has no long lived collection, growing cache, event subscription or background service. Local arrays and report rows remain reachable for the duration of one command and are then eligible for garbage collection. There is no claim that a memory leak was fixed and no manual garbage collection.
+
+Streaming could reduce peak memory for very large input, but sorting and grouping still need working storage and an open file iterator requires careful disposal. This project deliberately loads a bounded file snapshot so errors are resolved before reporting and repeated queries do not reread files or use disposed resources. The trade off is memory proportional to the input size. No fixed performance target is claimed.
+
 Task 5 Resource ownership and export
 
 InventoryStore.Load uses File.ReadAllText. This convenience API owns and closes its internal reader and file handle on success and failure. Validation and deferred queries run after the file is closed. They retain only managed product data and never yield from an open file.
