@@ -43,6 +43,7 @@ tests.AddRange(ScoringTests.Cases());
 tests.AddRange(DeferredTests.Cases());
 tests.AddRange(FileTests.Cases());
 tests.AddRange(NativeTests.Cases());
+tests.AddRange(WorkflowTests.Cases());
 
 var failures = 0;
 foreach (var test in tests)

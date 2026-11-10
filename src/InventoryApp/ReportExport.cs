@@ -9,6 +9,8 @@ public static class ReportExport
     public static Result<string> Save(string path, ReportBundle reports)
     {
         string? temporary = null;
+        Result<string> result;
+        Error? cleanupError = null;
         try
         {
             var destination = Path.GetFullPath(path);
@@ -17,14 +19,20 @@ public static class ReportExport
             temporary = Path.Combine(directory, $".inventory-{Guid.NewGuid():N}.tmp");
             File.WriteAllText(temporary, JsonSerializer.Serialize(reports, new JsonSerializerOptions { WriteIndented = true }));
             File.Move(temporary, destination, overwrite: true);
-            return Result<string>.Success(destination);
+            result = Result<string>.Success(destination);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException)
-        { return Result<string>.Failure("FileWrite", ex.Message); }
+        { result = Result<string>.Failure("FileWrite", ex.Message); }
         finally
         {
-            if (temporary is not null && File.Exists(temporary))
-                File.Delete(temporary);
+            try
+            {
+                if (temporary is not null && File.Exists(temporary))
+                    File.Delete(temporary);
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+            { cleanupError = new Error("FileCleanup", $"Temporary export could not be removed: {ex.Message}"); }
         }
+        return cleanupError is null ? result : Result<string>.Failure(cleanupError.Code, cleanupError.Message);
     }
 }

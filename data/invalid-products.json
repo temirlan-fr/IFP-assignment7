@@ -1,0 +1,3 @@
+[
+  { "id": "P001", "name": "Notebook", "category": "Stationery", "quantity": -1, "reorderLevel": 10, "unitPriceCents": 250 }
+]
