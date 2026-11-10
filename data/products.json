@@ -1,0 +1,8 @@
+[
+  { "id": "P001", "name": "Notebook", "category": "Stationery", "quantity": 3, "reorderLevel": 10, "unitPriceCents": 250 },
+  { "id": "P002", "name": "Pen", "category": "Stationery", "quantity": 3, "reorderLevel": 10, "unitPriceCents": 100 },
+  { "id": "P003", "name": "Keyboard", "category": "Electronics", "quantity": 2, "reorderLevel": 5, "unitPriceCents": 3000 },
+  { "id": "P004", "name": "Mouse", "category": "Electronics", "quantity": 8, "reorderLevel": 5, "unitPriceCents": 1500 },
+  { "id": "P005", "name": "Tea", "category": "Pantry", "quantity": 0, "reorderLevel": 4, "unitPriceCents": 500 },
+  { "id": "P006", "name": "Coffee", "category": "Pantry", "quantity": 6, "reorderLevel": 4, "unitPriceCents": 800 }
+]

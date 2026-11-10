@@ -28,4 +28,14 @@ dotnet run --project src/InventoryApp
 
 dotnet run --project tests/InventoryApp.Tests
 
-The assertion based test runner returns exit code one on failure. Task 1 contains six pure function and validation tests.
+The assertion based test runner returns exit code one on failure.
+
+Task 2 LINQ reports
+
+Input is data/products.json containing six inventory products. InventoryStore.Load reads JSON and InventoryStore.Parse validates every row before returning a complete snapshot. Missing numeric fields, null rows, duplicate ids, negative values and invalid JSON produce explicit failures.
+
+Reports.LowStock helps a purchasing officer identify products below their reorder level. It uses Where to filter shortage above zero, Select to project id, name, category, quantity, shortage and restock cost in cents, then OrderByDescending on shortage and ThenBy on ordinal id. Expected order is P001 P002 P005 P003. Shortages are 7 7 4 3 and restock costs are 1750 700 2000 9000 cents.
+
+Reports.CategoryValues helps a warehouse manager assess available inventory. It filters positive quantities, groups by ordinal category, counts product types, sums units and sums quantity times price in 64 bit integer cents. It sorts value descending and category ascending to break ties. Expected results are Electronics with 2 products 10 units and 18000 cents, Pantry with 1 product 6 units and 4800 cents, and Stationery with 2 products 6 units and 1050 cents. Zero stock contributes no available value.
+
+Both reports are pure transformations in Reports.cs. Program.cs alone displays rows. Tests cover normal values, empty data, no matches, reversed input with tied values, grouping, invalid records and 64 bit monetary arithmetic. Latest result after Task 2 is 12 tests passed.

@@ -1,4 +1,6 @@
 using InventoryApp;
+using InventoryApp.Tests;
+using static InventoryApp.Tests.Check;
 
 var tests = new List<(string Name, Action Run)>
 {
@@ -36,6 +38,8 @@ var tests = new List<(string Name, Action Run)>
     })
 };
 
+tests.AddRange(ReportTests.Cases());
+
 var failures = 0;
 foreach (var test in tests)
 {
@@ -48,8 +52,3 @@ return failures == 0 ? 0 : 1;
 static Product Item(string id = "P001", string category = "Stationery", int quantity = 3, int price = 250) =>
     Product.Create(id, id, category, quantity, 10, price).Value;
 
-static void Equal<T>(T expected, T actual)
-{
-    if (!EqualityComparer<T>.Default.Equals(expected, actual))
-        throw new Exception($"Expected {expected}, got {actual}");
-}
