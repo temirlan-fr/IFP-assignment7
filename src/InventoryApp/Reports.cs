@@ -1,13 +1,15 @@
 namespace InventoryApp;
 
-public sealed record LowStockRow(string Id, string Name, string Category, int Quantity, int Shortage, long RestockCostCents);
+public sealed record LowStockRow(string Id, string Name, string Category, int Quantity, int Shortage, long RestockCostCents, long StandardScore, long UrgentScore);
 public sealed record CategoryRow(string Category, int ProductCount, long Units, long ValueCents);
 
 public static class Reports
 {
-    public static LowStockRow[] LowStock(IEnumerable<Product> products) => products
+    public static LowStockRow[] LowStock(IEnumerable<Product> products) => LowStock(products, p => p.Shortage(), p => p.Shortage());
+
+    public static LowStockRow[] LowStock(IEnumerable<Product> products, Func<Product, long> standardScore, Func<Product, long> urgentScore) => products
         .Where(p => p.Shortage() > 0)
-        .Select(p => new LowStockRow(p.Id, p.Name, p.Category, p.Quantity, p.Shortage(), (long)p.Shortage() * p.UnitPriceCents))
+        .Select(p => new LowStockRow(p.Id, p.Name, p.Category, p.Quantity, p.Shortage(), (long)p.Shortage() * p.UnitPriceCents, standardScore(p), urgentScore(p)))
         .OrderByDescending(row => row.Shortage)
         .ThenBy(row => row.Id, StringComparer.Ordinal)
         .ToArray();

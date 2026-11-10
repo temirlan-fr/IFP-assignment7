@@ -30,6 +30,12 @@ dotnet run --project tests/InventoryApp.Tests
 
 The assertion based test runner returns exit code one on failure.
 
+Task 3 Currying and partial application
+
+Scoring.CreateScore takes an immutable validated ScoreConfiguration and returns a function from Product to long. Arguments arrive in successive calls. Program.cs fixes weight 2 and empty stock bonus 5 for standard purchasing, then weight 5 and bonus 20 for urgent purchasing. Both configured functions are passed into Reports.LowStock. No global setting changes.
+
+Score is shortage times weight plus an empty stock bonus only when a shortage exists. Notebook receives 14 and 35 on the same input. Tea receives 13 and 40. A product with no shortage scores zero. Tests assert both configured functions and invalid configuration boundaries. Latest result after Task 3 is 14 tests passed.
+
 Task 2 LINQ reports
 
 Input is data/products.json containing six inventory products. InventoryStore.Load reads JSON and InventoryStore.Parse validates every row before returning a complete snapshot. Missing numeric fields, null rows, duplicate ids, negative values and invalid JSON produce explicit failures.
