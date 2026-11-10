@@ -3,7 +3,7 @@ namespace InventoryApp;
 public static class Workflow
 {
     public static Result<ReportBundle> Run(string inputPath, string outputPath,
-        Func<Product, long> standardScore, Func<Product, long> urgentScore)
+        Func<Product, long> standardScore, Func<Product, long> urgentScore, NativeRestockCalculator? native = null)
     {
         try
         {
@@ -15,7 +15,15 @@ public static class Workflow
 
         return InventoryStore.Load(inputPath).Bind(products =>
         {
-            var reports = new ReportBundle(Reports.LowStock(products, standardScore, urgentScore), Reports.CategoryValues(products));
+            var calculator = native ?? new NativeRestockCalculator();
+            long nativeTotal = 0;
+            foreach (var product in products)
+            {
+                var cost = calculator.Calculate(product.Quantity, product.ReorderLevel, product.UnitPriceCents);
+                if (!cost.IsSuccess) return Result<ReportBundle>.Failure(cost.Error!.Code, cost.Error.Message);
+                nativeTotal = checked(nativeTotal + cost.Value);
+            }
+            var reports = new ReportBundle(Reports.LowStock(products, standardScore, urgentScore), Reports.CategoryValues(products), nativeTotal);
             return ReportExport.Save(outputPath, reports).Bind(_ => Result<ReportBundle>.Success(reports));
         });
     }

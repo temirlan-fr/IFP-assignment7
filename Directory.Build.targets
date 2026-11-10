@@ -1,0 +1,11 @@
+<Project>
+  <PropertyGroup>
+    <InventoryNativePath>$(MSBuildThisFileDirectory)native/build/win-x64/inventory_native.dll</InventoryNativePath>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="$(InventoryNativePath)" Link="inventory_native.dll" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+  <Target Name="RequireInventoryNativeLibrary" BeforeTargets="PrepareForBuild">
+    <Error Condition="!Exists('$(InventoryNativePath)')" Text="Native DLL missing. Run powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-native.ps1 from the repository root." />
+  </Target>
+</Project>

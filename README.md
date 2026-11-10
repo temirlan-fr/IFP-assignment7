@@ -30,6 +30,20 @@ dotnet run --project tests/InventoryApp.Tests
 
 The assertion based test runner returns exit code one on failure.
 
+Task 8 C sharp native binding and workflow
+
+NativeRestockCalculator.NativeMethods.RestockCost uses DllImport with the exact export inventory_restock_cost and CallingConvention.Cdecl. C int32_t maps to C sharp int and C int64_t maps to C sharp long. Directory.Build.props sets PlatformTarget to x64. No unsafe code or extra package is required.
+
+Directory.Build.targets requires the native build and copies inventory_native.dll beside both the application and test assemblies on build and publish. The binding searches the assembly directory. A clean build therefore runs the native script first. The DLL is owned by the runtime for the process lifetime and the C function creates no resources requiring manual release.
+
+NativeRestockCalculator.Calculate validates input before invoking C and returns explicit NativeUnavailable, NativeEntryPoint, NativeArchitecture or NativeRejected failures at the boundary. Tests inject controlled exceptions to verify failure translation. Normal operation always uses the real P Invoke binding and contains no managed fallback.
+
+Workflow.Run loads and validates the dataset, calls the native adapter for every product, then passes the configured scoring functions into the pure reports and exports their complete snapshot. The native total is displayed and exported. The sample total is 13450 cents. The failure path returns before writing an export or changing input. Native loading and file operations remain outside Reports.cs and Scoring.cs.
+
+dotnet run --project src/InventoryApp -- --probe-native
+
+This invokes the real DLL and prints 1750 cents. The integration tests also assert a real 1750 cent result, a stocked product result of zero and the maximum supported amount. Latest result after Task 8 is 23 tests passed.
+
 Task 7 Native C library contract
 
 native/inventory_native.c and native/inventory_native.h implement inventory_restock_cost. Its three arguments are int32_t quantity, reorder_level and unit_price_cents. Each accepts zero through one million inclusive. The return type is int64_t and represents the missing units times the unit price in cents. A product at or above its reorder level returns zero. Invalid input returns minus one. The export uses the C calling convention cdecl and fixed width types to avoid platform dependent long sizes.

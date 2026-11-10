@@ -2,7 +2,7 @@ using System.Text.Json;
 
 namespace InventoryApp;
 
-public sealed record ReportBundle(LowStockRow[] LowStock, CategoryRow[] Categories);
+public sealed record ReportBundle(LowStockRow[] LowStock, CategoryRow[] Categories, long NativeRestockTotalCents = 0);
 
 public static class ReportExport
 {
