@@ -30,6 +30,14 @@ dotnet run --project tests/InventoryApp.Tests
 
 The assertion based test runner returns exit code one on failure.
 
+Task 5 Resource ownership and export
+
+InventoryStore.Load uses File.ReadAllText. This convenience API owns and closes its internal reader and file handle on success and failure. Validation and deferred queries run after the file is closed. They retain only managed product data and never yield from an open file.
+
+ReportExport.Save uses File.WriteAllText, which owns and closes its internal writer. It writes a uniquely named temporary file beside the destination, then moves the completed file into place. A finally block removes an unfinished temporary file. Failed replacement leaves an existing destination untouched. Workflow.Run rejects an output path equal to the input path and returns explicit errors before displaying success. Product data is never modified.
+
+FileTests uses using scopes for temporary folders and exclusive FileStream probes. Tests assert that successful and malformed reads permit immediate exclusive access and deletion. Export tests check exclusive access after success and removal of temporary files after a failed replacement. Missing files are safe FileMissing results. The default export is artifacts/reports.json. Latest result after Task 5 is 20 tests passed.
+
 Task 4 Deferred execution
 
 Reports.ProjectStock uses yield return to project actual products into stock report rows. Creating the enumerable and obtaining its enumerator do not process a product. MoveNext processes the next product. DeferredTests uses a test only scoring probe to assert zero calls before iteration, one call after the first item, and the expected total after enumeration. Production calculations contain no diagnostic counters.
